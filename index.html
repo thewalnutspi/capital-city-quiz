@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	
+	<title>Capital City Quiz</title>
+	
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous" />
+	
+	<!-- Hightlight.js -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github-gist.min.css" />
+	<style>pre > code { background: transparent !important; padding: 0px !important; }</style>
+	
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
+</head>
+<body>
+	<div class="page">
+		<div class="jumbotron">
+			<div class="container">
+				<h1>Capital City Quiz</h1>
+				<p>A quiz of your knowledge of capital cities.</p>
+				<h3>Project information</h3>
+				<p>For more information see here: <a href="https://docs.google.com/a/walnuts.milton-keynes.sch.uk/document/d/1A56i7NbrazE-FjRN0-ZYB9_LDZfEOSI37f9lcorMaAE/edit?usp=sharing">Programming Project Paperwork: Capital City Quiz on Google Docs</a>.</p>
+			</div>
+		</div>
+		<div class="container capital-city-quiz" data-capitalcityquiz-storage-token="https://github.com/thewalnutspi/capital-city-quiz">
+			<p class="alert alert-danger"><span class="glyphicon glyphicon-alert"></span> The game failed to load.</p>
+			<noscript>
+				<p class="alert alert-danger"><span class="glyphicon glyphicon-alert"></span> You don't have JavaScript enabled. Don't you want to see the fancy game?</p>
+			</noscript>
+		</div>
+		<div class="container" style="margin-top: 30px;">
+			<footer class="footer">
+				<p>Samuel Elliott 2017 <a href="https://github.com/thewalnutspi/capital-city-quiz">https://github.com/thewalnutspi/capital-city-quiz</a>.</p>
+			</footer>
+		</div>
+		<div style="margin-top: 80px;"></div>
+	</div>
+	
+	<template id="capital-city-quiz-start-template">
+		<p>Five random countries have been selected.</p>
+		<p>Enter their capital cities.</p>
+		<p class="capital-city-quiz-status"></p>
+		<p><button class="btn btn-primary capital-city-quiz-start" type="button">Start</button></p>
+	</template>
+	<template id="capital-city-quiz-enter-template">
+		<h3>What is the capital city of <span class="capital-city-quiz-country-name"></span>?</h3>
+		<form>
+			<div class="form-group">
+				<input class="form-control" type="text" placeholder="Enter the capital city of {{country_name}}" required="required" />
+			</div>
+			<div class="form-group">
+				<p class="btn-group"><button class="btn btn-default capital-city-quiz-next" type="submit">Next</button></p>
+			</div>
+		</form>
+	</template>
+	<template id="capital-city-quiz-finished-template">
+		<h3>You've got <span class="capital-city-quiz-score-1"></span> point<span class="capital-city-quiz-score-s"></span>!</h3>
+		<p>Wow, go buy a lottery ticket or something.</p>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Question</th>
+					<th>Answer</th>
+					<th>Attempts</th>
+				</tr>
+			</thead>
+			<tbody class="capital-city-quiz-overview-table"></tbody>
+		</table>
+		
+		<div class="capital-city-quiz-save">
+			<h4>Save</h4>
+			<form class="form-horizontal">
+				<div class="form-group">
+					<label class="control-label col-sm-3">Name</label>
+					<div class="col-sm-9">
+						<input class="form-control" type="text" placeholder="Enter your name" value="" required="required" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">Date</label>
+					<div class="col-sm-9">
+						<input class="form-control" name="timestamp" type="text" value="" disabled="disabled" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-9 col-sm-offset-3">
+						<button class="btn btn-default capital-city-quiz-next" type="submit">Save</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</template>
+	<template id="capital-city-quiz-saved-template">
+		<h3>Saved scores</h3>
+		<div class="capital-city-quiz-saved"></div>
+		<p><button class="btn btn-primary capital-city-quiz-saved-done" type="button">Done</button><span class="btn-group" style="margin-left: 10px;"><button class="btn btn-default capital-city-quiz-clear-saved" type="button">Clear</button></span></p>
+	</template>
+	<template id="capital-city-quiz-failed-to-load-data-template">
+		<h4>Failed to load country data</h4>
+		<p>You can <a href="javascript:">try again now</a> or wait.</p>
+	</template>
+	
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<!-- Highlight.js -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	<script src="https://raw.githubusercontent.com/Aaronius/jquery-scrollparent/master/jquery.scrollparent.js"></script>
+	<script src="js/capital-city-quiz.js"></script>
+	<script src="js/diacritics.js"></script>
+</body>
+</html>
