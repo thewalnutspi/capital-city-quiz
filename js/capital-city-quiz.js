@@ -4,16 +4,18 @@ jQuery(document).ready(function($) {
 	$.capitalcityquiz.resources_url = "resources/";
 	$.capitalcityquiz.number_of_questions = 5;
 	
+	$.capitalcityquiz.parent_template = $("#capital-city-quiz-parent-template");
 	$.capitalcityquiz.start_template = $("#capital-city-quiz-start-template");
 	$.capitalcityquiz.enter_template = $("#capital-city-quiz-enter-template");
 	$.capitalcityquiz.finished_template = $("#capital-city-quiz-finished-template");
 	$.capitalcityquiz.saved_template = $("#capital-city-quiz-saved-template");
+	$.capitalcityquiz.configuration_template = $("#capital-city-quiz-configuration-template");
 	$.capitalcityquiz.failed_to_load_data_template = $("#capital-city-quiz-failed-to-load-data-template");
 	
 	$.capitalcityquiz.setup = function($this) {
 		$this = $($this);
 		
-		$this.html("<p class=\"pull-right\"><span class=\"capital-city-quiz-question-number\" style=\"margin: 7px 13px;\">Question 0/0</span><span class=\"capital-city-quiz-score\" style=\"margin: 7px 13px;\"><span class=\"capital-city-quiz-score-1\"></span> point<span class=\"capital-city-quiz-score-s\"></span></span><span class=\"btn-group\"><button class=\"btn btn-default capital-city-quiz-restart\" style=\"display: none;\">Restart</button><button class=\"btn btn-default capital-city-quiz-view-saved\" style=\"display: none;\">View saved</button></span></p><h3>Capital City Quiz</h3><div class=\"capital-city-quiz-messages\"></div><div class=\"capital-city-quiz-container\"><p class=\"alert alert-info\">Loading...</p></div>");
+		$this.html($.capitalcityquiz.parent_template.html());
 		
 		if(!$.capitalcityquiz.supportsStorage($this))
 			$this.find(".capital-city-quiz-view-saved").remove();
@@ -39,7 +41,7 @@ jQuery(document).ready(function($) {
 		$.capitalcityquiz.setScore($this, 0);
 		$this.data("capitalcityquiz-saved", false);
 		
-		$.capitalcityquiz.renderStartTemplate($this);
+		$.capitalcityquiz.renderStartTemplate($this, countries.length);
 	};
 	
 	$.capitalcityquiz.loadData = function(reload) {
@@ -88,7 +90,14 @@ jQuery(document).ready(function($) {
 	};
 	
 	$.capitalcityquiz.getCountries = function(number) {
-		var countries = Object.keys($.capitalcityquiz.data.names);
+		var countries = [];
+		
+		// Filter countries that don't have a capital city
+		$.each($.capitalcityquiz.data.names, function(iso2, name) {
+			if($.capitalcityquiz.data.capital[iso2] && ($.capitalcityquiz.data.capital[iso2].length >= 1))
+				countries.push(iso2);
+		});
+		
 		countries.sort(function(a, b) {
 			return 0.5 - Math.random();
 		});
@@ -161,7 +170,7 @@ jQuery(document).ready(function($) {
 		
 		var storage_token = $.capitalcityquiz.getStorageToken($this),
 			finished_timestamp = $this.data("capitalcityquiz-finished-timestamp"),
-			storage = JSON.parse(window.localStorage.capitalcityquiz) || {};
+			storage = JSON.parse(window.localStorage.capitalcityquiz || "{}") || {};
 		
 		storage = storage || {};
 		storage[storage_token + "_saved"] = storage[storage_token + "_saved"] || [];
@@ -181,7 +190,7 @@ jQuery(document).ready(function($) {
 			return false;
 		
 		var storage_token = $.capitalcityquiz.getStorageToken($this),
-			storage = JSON.parse(window.localStorage.capitalcityquiz) || {};
+			storage = JSON.parse(window.localStorage.capitalcityquiz || "{}") || {};
 		
 		if(!storage || !storage[storage_token + "_saved"])
 			return [];
@@ -272,7 +281,20 @@ jQuery(document).ready(function($) {
 		$.capitalcityquiz.renderFinishedTemplate($this, countries);
 	};
 	
-	$.capitalcityquiz.renderStartTemplate = function($this) {
+	$.capitalcityquiz.showConfiguration = function($this) {
+		var countries = $this.data("capitalcityquiz-countries"),
+			selected_countries = [];
+		
+		$.each(countries, function(key, value) {
+			selected_countries.push(value.iso2);
+		});
+		
+		console.log(selected_countries);
+		
+		$.capitalcityquiz.renderConfigurationTemplate($this, selected_countries);
+	};
+	
+	$.capitalcityquiz.renderStartTemplate = function($this, number_of_questions) {
 		$this.attr("data-capitalcityquiz", "template-start");
 		$this.find(".capital-city-quiz-question-number").hide();
 		$this.find(".capital-city-quiz-score").hide();
@@ -282,10 +304,16 @@ jQuery(document).ready(function($) {
 		$this.find(".capital-city-quiz-view-saved").show().on("click", function() {
 			$.capitalcityquiz.showSaved($this);
 		});
+		$this.find(".capital-city-quiz-configuration").show().on("click", function() {
+			$.capitalcityquiz.showConfiguration($this);
+		});
 		$this.find(".capital-city-quiz-container").html($.capitalcityquiz.start_template.html());
 		$this.find(".capital-city-quiz-start").on("click", function() {
 			$.capitalcityquiz.showNextQuestion($this);
 		});
+		
+		if(number_of_questions != 5)
+			$this.find(".capital-city-quiz-p1").text(number_of_questions + " random questions have been selected.");
 	};
 	
 	$.capitalcityquiz.renderInputTemplate = function($this, question_number, country) {
@@ -294,6 +322,7 @@ jQuery(document).ready(function($) {
 		$this.find(".capital-city-quiz-score").show();
 		$this.find(".capital-city-quiz-restart").show();
 		$this.find(".capital-city-quiz-view-saved").hide();
+		$this.find(".capital-city-quiz-configuration").hide();
 		$this.find(".capital-city-quiz-container").html($.capitalcityquiz.enter_template.html());
 		$this.find(".capital-city-quiz-country-name").text(country.name);
 		$this.find("input").each(function() {
@@ -349,6 +378,7 @@ jQuery(document).ready(function($) {
 		$this.find(".capital-city-quiz-score").hide();
 		$this.find(".capital-city-quiz-restart").show();
 		$this.find(".capital-city-quiz-view-saved").show();
+		$this.find(".capital-city-quiz-configuration").hide();
 		$this.find(".capital-city-quiz-container").html($.capitalcityquiz.finished_template.html());
 		$.capitalcityquiz.updateScore($this);
 		
@@ -366,6 +396,10 @@ jQuery(document).ready(function($) {
 			$tr.append($("<td></td>").text(country.capital));
 			$tr.append($("<td></td>").text(country.attempts));
 		});
+		
+		var date = new Date($this.data("capitalcityquiz-finished-timestamp"));
+		
+		$this.find("form .form-control[name='timestamp']").val(date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() + ", " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds());
 		
 		$this.find("form").on("submit", function(event) {
 			event.preventDefault();
@@ -390,8 +424,9 @@ jQuery(document).ready(function($) {
 		$this.attr("data-capitalcityquiz", "template-saved");
 		$this.find(".capital-city-quiz-question-number").hide();
 		$this.find(".capital-city-quiz-score").hide();
-		$this.find(".capital-city-quiz-restart").hide();
+		$this.find(".capital-city-quiz-restart").show().text("Back");
 		$this.find(".capital-city-quiz-view-saved").hide();
+		$this.find(".capital-city-quiz-configuration").hide();
 		$this.find(".capital-city-quiz-container").html($.capitalcityquiz.saved_template.html());
 		
 		$this.find(".capital-city-quiz-saved-done").on("click", function() {
@@ -434,15 +469,117 @@ jQuery(document).ready(function($) {
 		});
 	};
 	
+	$.capitalcityquiz.renderConfigurationTemplate = function($this, selected_countries) {
+		$this.attr("data-capitalcityquiz", "template-configuration");
+		$this.find(".capital-city-quiz-question-number").hide();
+		$this.find(".capital-city-quiz-score").hide();
+		$this.find(".capital-city-quiz-restart").show().text("Use defaults").on("click", function() {
+			$this.attr("data-capitalcityquiz-number-of-questions", null);
+		});
+		$this.find(".capital-city-quiz-view-saved").hide();
+		$this.find(".capital-city-quiz-configuration").hide();
+		$this.find(".capital-city-quiz-container").html($.capitalcityquiz.configuration_template.html());
+		
+		var $tbody = $this.find(".capital-city-quiz-countries-table"),
+			$unselected_tbody = $this.find(".capital-city-quiz-unselected-countries-table"),
+			$selected_tbody = $this.find(".capital-city-quiz-selected-countries-table");
+		
+		$.each($.capitalcityquiz.data.names, function(iso2, country_name) {
+			var $tr = $("<tr></tr>").attr("data-capitalcityquiz-country-iso2", iso2);
+			
+			$tr.append($("<td></td>").html("<span class=\"capital-city-quiz-drag-handle\"><span class=\"glyphicon glyphicon-resize-vertical\"></span></span><a class=\"capital-city-quiz-add\" href=\"javascript:\"><span class=\"glyphicon glyphicon-plus\"></span></a><a class=\"capital-city-quiz-remove\" href=\"javascript:\"><span class=\"glyphicon glyphicon-minus\"></span></a>"));
+			$tr.append($("<td></td>").text(iso2));
+			$tr.append($("<td></td>").text(country_name));
+			$tr.append($("<td></td>").text($.capitalcityquiz.getCapitalCity(iso2)));
+			
+			if($.inArray(iso2, selected_countries) != -1)
+				$tr.appendTo($selected_tbody).find(".capital-city-quiz-add").hide();
+			else $tr.appendTo($unselected_tbody).find(".capital-city-quiz-remove").hide();
+			
+			$tr.find(".capital-city-quiz-add").on("click", function() {
+				$(this).hide().next().show().parent().parent().detach().appendTo($selected_tbody);
+			});
+			$tr.find(".capital-city-quiz-remove").on("click", function() {
+				$(this).hide().prev().show().parent().parent().detach().prependTo($unselected_tbody);
+			});
+		});
+		
+		$tbody.sortable({
+			connectWith: ".capital-city-quiz-countries-table",
+			handle: ".capital-city-quiz-drag-handle",
+			helper: function(e, ui) {
+				ui.children().each(function() {
+					$(this).width($(this).width());
+				});
+				return ui;
+			},
+			change: function(event, ui) {
+				var $tr = ui.item,
+					$placeholder = ui.placeholder,
+					is_selected = $placeholder.parent().hasClass("capital-city-quiz-selected-countries-table");
+				
+				if(is_selected)
+					$tr.find(".capital-city-quiz-add").hide().next().show();
+				else $tr.find(".capital-city-quiz-remove").hide().prev().show();
+				
+				$placeholder.html("<td></td><td></td><td></td><td></td>");
+			}
+		});
+		
+		$this.find(".capital-city-quiz-clear-configuration").on("click", function() {
+			$selected_tbody.children("[data-capitalcityquiz-country-iso2]").detach().prependTo($unselected_tbody).find(".capital-city-quiz-remove").hide().prev().show();
+		});
+		
+		$this.find(".capital-city-quiz-cancel-configuration").on("click", function() {
+			$.capitalcityquiz.setup($this);
+		});
+		
+		$this.find("form").on("submit", function(event) {
+			event.preventDefault();
+			var $tbody = $this.find(".capital-city-quiz-countries-table"),
+				countries = [];
+			
+			$selected_tbody.children("[data-capitalcityquiz-country-iso2]").each(function(key, value) {
+				var $tr = $(this),
+					iso2 = $tr.attr("data-capitalcityquiz-country-iso2");
+				
+				countries.push({
+					iso2: iso2,
+					name: $.capitalcityquiz.getCountryName(iso2),
+					capital: $.capitalcityquiz.getCapitalCity(iso2),
+					attempts: 0,
+					cheated: false,
+					done: false
+				});
+			});
+			
+			if(countries.length < 1) {
+				$.capitalcityquiz.message($this, "warning", "You must set at least one country.");
+				return false;
+			}
+			
+			// Reset this instance and load selected data
+			$this.attr("data-capitalcityquiz-number-of-questions", countries.length);
+			$.capitalcityquiz.setup($this);
+			$this.data("capitalcityquiz-countries", countries);
+			$this.find(".capital-city-quiz-p1").text("You've picked " + countries.length + " countr" + (countries.length == 1 ? "y" : "ies") + ".");
+			
+			console.log(countries);
+			
+			return false;
+		});
+	};
+	
 	$.capitalcityquiz.renderFailedToLoadDataTemplate = function($this) {
 		$this.attr("data-capitalcityquiz", "template-failed-to-load-data");
 		$this.find(".capital-city-quiz-question-number").hide();
 		$this.find(".capital-city-quiz-score").hide();
 		$this.find(".capital-city-quiz-restart").hide();
 		$this.find(".capital-city-quiz-view-saved").hide();
+		$this.find(".capital-city-quiz-configuration").hide();
 		$this.find(".capital-city-quiz-container").html($.capitalcityquiz.failed_to_load_data_template.html());
 		$this.find(".capital-city-quiz-retry").on("click", function() {
-			$.capitalcityquiz.start($this);
+			$.capitalcityquiz.setup($this);
 		});
 	};
 	

@@ -46,9 +46,27 @@
 		<div style="margin-top: 80px;"></div>
 	</div>
 	
+	<template id="capital-city-quiz-parent-template">
+		<p class="pull-right">
+			<span class="capital-city-quiz-question-number" style="margin: 7px 13px;">Question 0/0</span>
+			<span class="capital-city-quiz-score" style="margin: 7px 13px;"><span class="capital-city-quiz-score-1"></span> point<span class="capital-city-quiz-score-s"></span></span>
+			<span class="btn-group">
+				<button class="btn btn-default capital-city-quiz-restart" style="display: none;">Restart</button>
+				<button class="btn btn-default capital-city-quiz-view-saved" style="display: none;">View saved</button>
+				<button class="btn btn-default capital-city-quiz-configuration" style="display: none;">Configure</button>
+			</span>
+		</p>
+		<h3>Capital City Quiz</h3>
+		<div class="capital-city-quiz-messages"></div>
+		<div class="capital-city-quiz-container">
+			<p class="alert alert-info">Loading...</p>
+		</div>
+	</template>
 	<template id="capital-city-quiz-start-template">
-		<p>Five random countries have been selected.</p>
+		<p class="capital-city-quiz-p1">Five random countries have been selected.</p>
 		<p>Enter their capital cities.</p>
+		<p>Each country is worth three points. If you get if right the second time, you only get two points. If you get it right after that, you get one point. If you don't get it right after five times, you'll have the option to give up, but you won't get any points.</p>
+		<p>You can also change the countries by clicking / tapping the Configure button.</p>
 		<p class="capital-city-quiz-status"></p>
 		<p><button class="btn btn-primary capital-city-quiz-start" type="button">Start</button></p>
 	</template>
@@ -56,7 +74,7 @@
 		<h3>What is the capital city of <span class="capital-city-quiz-country-name"></span>?</h3>
 		<form>
 			<div class="form-group">
-				<input class="form-control" type="text" placeholder="Enter the capital city of {{country_name}}" required="required" />
+				<input class="form-control" type="text" placeholder="Enter the capital city of {{country_name}}" required="required" autocomplete="off" />
 			</div>
 			<div class="form-group">
 				<p class="btn-group"><button class="btn btn-default capital-city-quiz-next" type="submit">Next</button></p>
@@ -65,7 +83,6 @@
 	</template>
 	<template id="capital-city-quiz-finished-template">
 		<h3>You've got <span class="capital-city-quiz-score-1"></span> point<span class="capital-city-quiz-score-s"></span>!</h3>
-		<p>Wow, go buy a lottery ticket or something.</p>
 		<table class="table">
 			<thead>
 				<tr>
@@ -81,19 +98,19 @@
 			<h4>Save</h4>
 			<form class="form-horizontal">
 				<div class="form-group">
-					<label class="control-label col-sm-3">Name</label>
-					<div class="col-sm-9">
+					<label class="control-label col-sm-2">Name</label>
+					<div class="col-sm-10">
 						<input class="form-control" type="text" placeholder="Enter your name" value="" required="required" />
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-sm-3">Date</label>
-					<div class="col-sm-9">
+					<label class="control-label col-sm-2">Date</label>
+					<div class="col-sm-10">
 						<input class="form-control" name="timestamp" type="text" value="" disabled="disabled" />
 					</div>
 				</div>
 				<div class="form-group">
-					<div class="col-sm-9 col-sm-offset-3">
+					<div class="col-sm-10 col-sm-offset-2">
 						<button class="btn btn-default capital-city-quiz-next" type="submit">Save</button>
 					</div>
 				</div>
@@ -105,13 +122,83 @@
 		<div class="capital-city-quiz-saved"></div>
 		<p><button class="btn btn-primary capital-city-quiz-saved-done" type="button">Done</button><span class="btn-group" style="margin-left: 10px;"><button class="btn btn-default capital-city-quiz-clear-saved" type="button">Clear</button></span></p>
 	</template>
+	<template id="capital-city-quiz-configuration-template">
+		<h3>Configuration</h3>
+		<p>Random countries are used by default. You can choose which countries to use and in which order they should appear on this page.</p>
+		<form>
+			<h4>Selected countries</h4>
+			<table class="table">
+				<thead>
+					<tr>
+						<th></th>
+						<th>ISO2</th>
+						<th>Country Name</th>
+						<th>Capital City</th>
+					</tr>
+				</thead>
+				<tbody class="capital-city-quiz-countries-table capital-city-quiz-selected-countries-table">
+					<tr class="capital-city-quiz-drop-target-row">
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<h4>Countries</h4>
+			<table class="table">
+				<thead>
+					<tr>
+						<th></th>
+						<th>ISO2</th>
+						<th>Country Name</th>
+						<th>Capital City</th>
+					</tr>
+				</thead>
+				<tbody class="capital-city-quiz-countries-table capital-city-quiz-unselected-countries-table">
+					<tr class="capital-city-quiz-drop-target-row">
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<div style="position: -webkit-sticky; position: sticky; bottom: 0px; padding: 10px 0px;">
+				<p class="btn-group">
+					<button class="btn btn-primary capital-city-quiz-save-configuration" type="submit">Save</button>
+					<button class="btn btn-default capital-city-quiz-clear-configuration" type="button">Clear</button>
+					<button class="btn btn-default capital-city-quiz-cancel-configuration" type="button">Cancel</button>
+				</p>
+			</div>
+		</form>
+	</template>
 	<template id="capital-city-quiz-failed-to-load-data-template">
 		<h4>Failed to load country data</h4>
-		<p>You can <a href="javascript:">try again now</a> or wait.</p>
+		<p>You can <a class="capital-city-quiz-retry" href="javascript:">try again now</a> or wait.</p>
 	</template>
+	<style id="capital-city-quiz-styles">
+		[data-capitalcityquiz="template-configuration"] thead {
+			position: -webkit-sticky;
+			position: sticky;
+			top: 0px;
+			background-color: rgba(255, 255, 255, 0.8);
+			-webkit-backdrop-filter: blur(5px);
+			backdrop-filter: blur(5px);
+		}
+		[data-capitalcityquiz="template-configuration"] tr.capital-city-quiz-drop-target-row:not(:only-child) {
+			display: none;
+		}
+		[data-capitalcityquiz="template-configuration"] tr.ui-sortable-helper td {
+			border: 0px none;
+		}
+	</style>
 	
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<!-- Highlight.js -->
